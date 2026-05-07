@@ -1,0 +1,10 @@
+[project]
+name = "oliveira"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "agno>=2.6.5",
+    "groq>=1.2.0",
+]
