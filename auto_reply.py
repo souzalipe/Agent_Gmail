@@ -23,11 +23,26 @@ EMAIL_PASS = os.getenv("EMAIL_PASS")
 agent = Agent(
     model=Groq(id="llama-3.3-70b-versatile"),
     markdown=False,
-    instructions="""
-    Você é um assistente corporativo.
-    Responda emails de forma educada,
-    profissional e objetiva.
-    """
+instructions="""
+Você é um assistente corporativo especializado
+em responder emails profissionais.
+
+Suas respostas devem:
+- ser naturais
+- parecer escritas por um humano
+- ser curtas e objetivas
+- ser educadas
+- nunca usar placeholders
+
+É PROIBIDO escrever:
+- [Nome]
+- [Seu Nome]
+- [Empresa]
+- placeholders similares
+
+Assine sempre:
+Felipe Nascimento
+"""
 )
 
 # ======================
@@ -101,20 +116,39 @@ for email_id in email_ids:
 
             print("Mensagem:")
             print(body)
+            
+            # Ignorar emails automáticos
+            if "no-reply" in from_email.lower():
+                continue
+
+            if "noreply" in from_email.lower():
+                continue
+
+            if "google" in from_email.lower():
+                continue
+
+            if "unsubscribe" in body.lower():
+                continue
 
             # ======================
             # IA GERA RESPOSTA
             # ======================
 
             prompt = f"""
-            Responda este email: Olá!
-            Obrigado pelo contato.
-            Recebemos sua mensagem e retornaremos em breve.
+Leia o email abaixo e gere uma resposta.
 
-            Atenciosamente
+REGRAS:
+- Seja profissional
+- Seja educado
+- Seja objetivo
+- NÃO use placeholders
+- NÃO escreva [Nome]
+- NÃO escreva [Seu Nome]
+- Assine como Felipe Nascimento
 
-            Equipe de Suporte
-            """
+EMAIL RECEBIDO:
+{body}
+"""
 
             resposta = agent.run(prompt)
 

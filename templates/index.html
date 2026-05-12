@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Auto Reply — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+:root{
+  --bg:#080b12;
+  --bg2:#0d1120;
+  --bg3:#121828;
+  --border:#1c2336;
+  --border2:#28334f;
+  --text:#cdd9f0;
+  --muted:#3d4f70;
+  --muted2:#2a3550;
+  --blue:#4f8ef7;
+  --blue-d:rgba(79,142,247,.12);
+  --blue-b:rgba(79,142,247,.22);
+  --green:#22d3a0;
+  --green-d:rgba(34,211,160,.08);
+  --green-b:rgba(34,211,160,.18);
+  --amber:#f5a623;
+  --amber-d:rgba(245,166,35,.08);
+  --amber-b:rgba(245,166,35,.18);
+  --red:#f56565;
+  --red-d:rgba(245,101,101,.08);
+  --r:8px;--rs:5px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(79,142,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.025) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;position:relative;z-index:1}
+
+/* ── SIDEBAR ── */
+aside{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 0}
+.logo{display:flex;align-items:center;gap:9px;padding:0 1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.logo-mark{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#1a4bc4,#4f8ef7);
+  display:flex;align-items:center;justify-content:center}
+.logo-mark .ti{font-size:15px;color:#fff}
+.logo-name{font-size:13px;font-weight:700;color:#e0eaff;letter-spacing:-.02em}
+.logo-name span{color:var(--blue)}
+.nav-section{padding:1.25rem 1rem 0}
+.nav-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.14em;
+  text-transform:uppercase;padding:0 .25rem;margin-bottom:.5rem}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--rs);
+  color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:2px}
+.nav-item .ti{font-size:16px}
+.nav-item:hover,.nav-item.active{background:var(--blue-d);color:var(--blue)}
+
+.run-box{margin:auto 1rem 1rem;background:var(--blue-d);border:1px solid var(--blue-b);
+  border-radius:var(--r);padding:1rem}
+.run-box h4{font-size:12px;font-weight:600;color:#b0c8f8;margin-bottom:.75rem}
+.field{margin-bottom:.75rem}
+.field label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);
+  display:block;margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+.field input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border2);
+  border-radius:var(--rs);padding:7px 10px;font-size:12px;color:var(--text);
+  font-family:'Figtree',sans-serif;outline:none;transition:border-color .15s}
+.field input[type=text]:focus{border-color:var(--blue)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between}
+.toggle-label{font-size:12px;color:var(--muted)}
+.toggle{position:relative;width:34px;height:18px}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--border2);border-radius:999px;cursor:pointer;transition:.2s}
+.slider:before{content:'';position:absolute;width:12px;height:12px;left:3px;top:3px;
+  background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.slider{background:var(--amber)}
+.toggle input:checked+.slider:before{transform:translateX(16px)}
+.run-btn{width:100%;margin-top:.75rem;background:var(--blue);color:#fff;border:none;
+  border-radius:var(--rs);padding:9px;font-size:12px;font-family:'IBM Plex Mono',monospace;
+  letter-spacing:.06em;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.run-btn:hover:not(:disabled){background:#6fa3f9;transform:translateY(-1px)}
+.run-btn:disabled{opacity:.5;cursor:not-allowed}
+.run-btn.running{background:var(--amber);animation:pulse-btn 1.2s infinite}
+@keyframes pulse-btn{0%,100%{opacity:1}50%{opacity:.7}}
+
+/* ── MAIN ── */
+main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.page-title{font-size:22px;font-weight:700;color:#e0eaff;letter-spacing:-.03em}
+.page-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.status-pill{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;padding:5px 12px;border-radius:999px;border:1px solid var(--border2);color:var(--muted)}
+.status-pill.active{color:var(--green);background:var(--green-d);border-color:var(--green-b)}
+.sdot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.sdot.pulse{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem}
+.stat-val{font-size:28px;font-weight:700;color:#e0eaff;letter-spacing:-.04em;line-height:1}
+.stat-val b{color:var(--blue);font-weight:700}
+.stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted2);
+  text-transform:uppercase;letter-spacing:.12em;margin-top:5px}
+
+/* ── LOG ── */
+.log-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem}
+.log-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.log-title{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+  letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.clear-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted2);
+  background:none;border:none;cursor:pointer;transition:color .15s}
+.clear-btn:hover{color:var(--blue)}
+.log-lines{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#5a7299;
+  max-height:140px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.log-lines:empty::after{content:'Aguardando execução...';color:var(--muted2)}
+.log-line{color:#5a7299}
+.log-line.ok{color:var(--green)}
+.log-line.err{color:var(--red)}
+.log-line.skip{color:var(--amber)}
+.log-line.ai{color:var(--blue)}
+
+/* ── EMAILS ── */
+.section-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.section-title{font-size:14px;font-weight:600;color:#b0c8f8;
+  display:flex;align-items:center;gap:7px}
+.count-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;
+  background:var(--blue-d);color:var(--blue);border:1px solid var(--blue-b);
+  padding:2px 8px;border-radius:999px}
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;
+  border-radius:999px;border:1px solid var(--border2);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all .15s;letter-spacing:.06em}
+.filter-btn:hover,.filter-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-d)}
+
+.emails-list{display:flex;flex-direction:column;gap:8px}
+
+.email-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;transition:border-color .15s}
+.email-card:hover{border-color:var(--border2)}
+.email-card.sent{border-left:2px solid var(--green)}
+.email-card.skipped{border-left:2px solid var(--muted2)}
+.email-card.dry{border-left:2px solid var(--amber)}
+
+.email-header{display:flex;align-items:center;gap:1rem;padding:.9rem 1.1rem;cursor:pointer;
+  user-select:none}
+.email-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;
+  background:var(--blue-d);color:var(--blue)}
+.email-meta{flex:1;min-width:0}
+.email-from{font-size:13px;font-weight:600;color:#c8daf5;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-subj{font-size:12px;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-badges{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 9px;
+  border-radius:999px;letter-spacing:.04em}
+.badge-sent{background:var(--green-d);color:var(--green);border:1px solid var(--green-b)}
+.badge-skip{background:var(--muted2);color:var(--muted);border:1px solid var(--border2)}
+.badge-dry{background:var(--amber-d);color:var(--amber);border:1px solid var(--amber-b)}
+.badge-ai{background:var(--blue-d);color:var(--blue);border:1px solid var(--blue-b)}
+.chevron{font-size:14px;color:var(--muted);transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+
+.email-body{display:none;border-top:1px solid var(--border);
+  display:grid;grid-template-columns:1fr 1fr;gap:0}
+.email-body.hidden{display:none}
+.email-pane{padding:1rem 1.1rem}
+.email-pane+.email-pane{border-left:1px solid var(--border)}
+.pane-label{font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;
+  display:flex;align-items:center;gap:6px}
+.pane-text{font-size:12px;color:#7090b8;line-height:1.7;
+  white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.pane-reply{font-size:12px;color:#a0c4e8;line-height:1.7;
+  white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.skip-reason{font-size:12px;color:var(--amber);font-style:italic}
+
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted2)}
+.empty-state .ti{font-size:36px;display:block;margin-bottom:.75rem;color:var(--muted2)}
+.empty-state p{font-size:13px}
+
+/* ── SCROLL ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="logo">
+      <div class="logo-mark"><i class="ti ti-mail-bolt"></i></div>
+      <div class="logo-name">Auto<span>Reply</span></div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">menu</div>
+      <div class="nav-item active"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+      <div class="nav-item"><i class="ti ti-mail"></i> Emails</div>
+      <div class="nav-item"><i class="ti ti-terminal"></i> Logs</div>
+    </div>
+
+    <!-- RUN BOX -->
+    <div class="run-box">
+      <h4><i class="ti ti-player-play" style="margin-right:5px"></i>Executar Agente</h4>
+
+      <div class="field">
+        <label>Assinatura</label>
+        <input type="text" id="signature" value="Felipe Nascimento" placeholder="Seu nome"/>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">Dry Run (não envia)</span>
+        <label class="toggle">
+          <input type="checkbox" id="dry-run"/>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <button class="run-btn" id="run-btn" onclick="runAgent()">
+        <i class="ti ti-bolt"></i> Processar Emails
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div>
+        <div class="page-title">Caixa de Entrada</div>
+        <div class="page-sub">Respostas automáticas com IA</div>
+      </div>
+      <div class="status-pill" id="status-pill">
+        <div class="sdot"></div> Aguardando
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="s-total">0</div>
+        <div class="stat-lbl">Emails processados</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--green)" id="s-sent">0</div>
+        <div class="stat-lbl">Respostas enviadas</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--amber)" id="s-skip">0</div>
+        <div class="stat-lbl">Emails ignorados</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--blue)" id="s-ai">0</div>
+        <div class="stat-lbl">Gerados pela IA</div>
+      </div>
+    </div>
+
+    <!-- LOG -->
+    <div class="log-box">
+      <div class="log-header">
+        <div class="log-title"><i class="ti ti-terminal-2"></i> Terminal de execução</div>
+        <button class="clear-btn" onclick="clearLog()"><i class="ti ti-trash"></i> limpar</button>
+      </div>
+      <div class="log-lines" id="log-lines"></div>
+    </div>
+
+    <!-- EMAILS -->
+    <div>
+      <div class="section-head" style="margin-bottom:.75rem">
+        <div class="section-title">
+          <i class="ti ti-inbox"></i> Emails
+          <span class="count-badge" id="count-badge">0</span>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="setFilter('all',this)">todos</button>
+          <button class="filter-btn" onclick="setFilter('sent',this)">enviados</button>
+          <button class="filter-btn" onclick="setFilter('dry',this)">dry run</button>
+          <button class="filter-btn" onclick="setFilter('skipped',this)">ignorados</button>
+        </div>
+      </div>
+
+      <div class="emails-list" id="emails-list">
+        <div class="empty-state">
+          <i class="ti ti-inbox-off"></i>
+          <p>Nenhum email processado ainda.<br>Clique em <strong>Processar Emails</strong> para começar.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let currentFilter = 'all';
+let pollTimer = null;
+let allEmails = [];
+
+// ─── RUN ────────────────────────────────────────────────
+async function runAgent() {
+  const btn = document.getElementById('run-btn');
+  const sig = document.getElementById('signature').value.trim() || 'Felipe Nascimento';
+  const dry = document.getElementById('dry-run').checked;
+
+  btn.disabled = true;
+  btn.classList.add('running');
+  btn.innerHTML = '<i class="ti ti-loader"></i> Processando...';
+
+  setStatus(true);
+
+  try {
+    const res = await fetch('/api/run', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({signature: sig, dry_run: dry})
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      addLog('❌ ' + (err.detail || 'Erro ao iniciar'), 'err');
+      resetBtn();
+      return;
+    }
+  } catch(e) {
+    addLog('❌ Não foi possível conectar ao servidor', 'err');
+    resetBtn();
+    return;
+  }
+
+  pollTimer = setInterval(poll, 1500);
+}
+
+// ─── POLL ────────────────────────────────────────────────
+async function poll() {
+  try {
+    const [statusRes, emailsRes, logRes] = await Promise.all([
+      fetch('/api/status'),
+      fetch('/api/emails'),
+      fetch('/api/log'),
+    ]);
+
+    const status  = await statusRes.json();
+    const emails  = await emailsRes.json();
+    const logs    = await logRes.json();
+
+    updateStats(status, emails);
+    renderLog(logs);
+    allEmails = emails;
+    renderEmails();
+
+    if (!status.is_running) {
+      clearInterval(pollTimer);
+      setStatus(false);
+      resetBtn();
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+// ─── STATS ──────────────────────────────────────────────
+function updateStats(status, emails) {
+  document.getElementById('s-total').textContent = status.total;
+  document.getElementById('s-sent').textContent  = status.sent;
+  document.getElementById('s-skip').textContent  = status.skipped;
+  const ai = emails.filter(e => e.reply && !e.skipped).length;
+  document.getElementById('s-ai').textContent = ai;
+  document.getElementById('count-badge').textContent = status.total;
+}
+
+// ─── LOG ─────────────────────────────────────────────────
+function renderLog(logs) {
+  const box = document.getElementById('log-lines');
+  box.innerHTML = '';
+  logs.forEach(line => {
+    const div = document.createElement('div');
+    div.className = 'log-line ' + classifyLog(line);
+    div.textContent = line;
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function classifyLog(line) {
+  if (line.includes('✅') || line.includes('enviada')) return 'ok';
+  if (line.includes('❌')) return 'err';
+  if (line.includes('⏭️') || line.includes('Ignorado')) return 'skip';
+  if (line.includes('🤖') || line.includes('IA')) return 'ai';
+  return '';
+}
+
+function addLog(msg, cls='') {
+  const box = document.getElementById('log-lines');
+  const div = document.createElement('div');
+  div.className = 'log-line ' + cls;
+  div.textContent = msg;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function clearLog() {
+  document.getElementById('log-lines').innerHTML = '';
+}
+
+// ─── EMAILS ──────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEmails();
+}
+
+function renderEmails() {
+  const list = document.getElementById('emails-list');
+
+  let filtered = allEmails;
+  if (currentFilter === 'sent')    filtered = allEmails.filter(e => e.sent);
+  if (currentFilter === 'dry')     filtered = allEmails.filter(e => e.reply && !e.sent && !e.skipped);
+  if (currentFilter === 'skipped') filtered = allEmails.filter(e => e.skipped);
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state">
+      <i class="ti ti-inbox-off"></i>
+      <p>Nenhum email nesta categoria.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((e, i) => emailCard(e, i)).join('');
+}
+
+function emailCard(e, i) {
+  const initials = (e.from_email || '?').charAt(0).toUpperCase();
+  const cardClass = e.skipped ? 'skipped' : e.sent ? 'sent' : e.reply ? 'dry' : '';
+
+  const badge = e.skipped
+    ? `<span class="badge badge-skip">ignorado</span>`
+    : e.sent
+      ? `<span class="badge badge-sent">✓ enviado</span>`
+      : e.reply
+        ? `<span class="badge badge-dry">dry run</span>`
+        : `<span class="badge badge-ai">gerado</span>`;
+
+  const bodyContent = e.skipped
+    ? `<div class="email-pane" style="grid-column:span 2">
+         <div class="pane-label"><i class="ti ti-ban"></i> motivo</div>
+         <div class="skip-reason">${e.skip_reason || 'Filtrado automaticamente'}</div>
+       </div>`
+    : `<div class="email-pane">
+         <div class="pane-label"><i class="ti ti-mail-opened"></i> mensagem recebida</div>
+         <div class="pane-text">${esc(e.body || '')}</div>
+       </div>
+       <div class="email-pane">
+         <div class="pane-label"><i class="ti ti-robot"></i> resposta gerada</div>
+         <div class="pane-reply">${e.reply ? esc(e.reply) : '<em style="color:var(--muted2)">Nenhuma resposta gerada</em>'}</div>
+       </div>`;
+
+  return `
+  <div class="email-card ${cardClass}" id="card-${i}">
+    <div class="email-header" onclick="toggle(${i})">
+      <div class="email-avatar">${initials}</div>
+      <div class="email-meta">
+        <div class="email-from">${esc(e.from_email)}</div>
+        <div class="email-subj">${esc(e.subject)}</div>
+      </div>
+      <div class="email-badges">
+        ${badge}
+        <i class="ti ti-chevron-down chevron" id="chev-${i}"></i>
+      </div>
+    </div>
+    <div class="email-body hidden" id="body-${i}" style="display:none">
+      ${bodyContent}
+    </div>
+  </div>`;
+}
+
+function toggle(i) {
+  const body = document.getElementById('body-' + i);
+  const chev = document.getElementById('chev-' + i);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'grid';
+  chev.classList.toggle('open', !open);
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── STATUS PILL ─────────────────────────────────────────
+function setStatus(running) {
+  const pill = document.getElementById('status-pill');
+  if (running) {
+    pill.className = 'status-pill active';
+    pill.innerHTML = '<div class="sdot pulse"></div> Processando...';
+  } else {
+    pill.className = 'status-pill';
+    pill.innerHTML = '<div class="sdot"></div> Aguardando';
+  }
+}
+
+function resetBtn() {
+  const btn = document.getElementById('run-btn');
+  btn.disabled = false;
+  btn.classList.remove('running');
+  btn.innerHTML = '<i class="ti ti-bolt"></i> Processar Emails';
+}
+</script>
+</body>
+</html>
