@@ -1,8 +1,10 @@
 import imaplib
+import threading
 import smtplib
 import email
 import os
 import json
+from pathlib import Path
 from datetime import datetime
 from typing import List, Optional
 
@@ -12,13 +14,11 @@ from email.header import decode_header
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from email.mime.text import MIMEText  # Para criar emails em texto
-from email.header import decode_header  # Decodificar headers de emails
 from pydantic import BaseModel
 
 from dotenv import load_dotenv
 
-from agent.main import Agent
+from agno.agent import Agent
 from agno.models.groq import Groq
 
 load_dotenv()
@@ -29,12 +29,10 @@ app = FastAPI(title="Auto Reply Dashboard")
 processed_emails: List[dict] = []
 run_log: List[str] = []
 is_running: bool = False
-
-# Inicializa a aplicação FastAPI
-app = FastAPI(title="Auto Reply Dashboard")
+_pause_event = threading.Event()  # set() = pausado, clear() = rodando
 
 # ─── AGENTE IA ────────────────────────────────────────────
-def build_agent(signature: str = "") -> Agent:
+def build_agent(signature: str = "Felipe Nascimento") -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
         markdown=False,
@@ -42,11 +40,7 @@ def build_agent(signature: str = "") -> Agent:
 Você é um assistente corporativo especializado em responder emails profissionais.
 
 Suas respostas devem:
-    - ser naturais
-    - parecer escritas por um humano
-    - ser curtas e objetivas
-    - ser educadas
-    - nunca usar placeholders
+- ser naturais
 - parecer escritas por um humano
 - ser curtas e objetivas
 - ser educadas
@@ -64,11 +58,9 @@ Assine sempre:
     )
 
 
-# Configuração recebida via API para rodar o processamento
-
 # ─── SCHEMAS ──────────────────────────────────────────────
 class RunConfig(BaseModel):
-    signature: str = ""
+    signature: str = "Felipe Nascimento"
     dry_run: bool = False   # True = gera resposta mas NÃO envia
 
 
@@ -109,7 +101,9 @@ def should_skip(from_email: str, body: str) -> Optional[str]:
 def process_emails_task(signature: str, dry_run: bool):
     global is_running, processed_emails, run_log
 
+    global is_running, processed_emails, run_log
     is_running = True
+    _pause_event.clear()
     processed_emails = []
     run_log = []
 
@@ -134,6 +128,10 @@ def process_emails_task(signature: str, dry_run: bool):
         log(f"📬 {len(email_ids)} email(s) não lido(s) encontrado(s)")
 
         for idx, email_id in enumerate(email_ids):
+            if _pause_event.is_set():
+                log("⏸️  Agente pausado pelo usuário.")
+                break
+
             eid = email_id.decode()
             status, msg_data = mail.fetch(email_id, "(RFC822)")
 
@@ -260,8 +258,29 @@ def get_log():
     return run_log
 
 
+@app.post("/api/pause")
+def pause_agent():
+    _pause_event.set()
+    log("⏸️  Agente pausado pelo usuário.")
+    return {"status": "paused"}
+
+
+@app.post("/api/resume")
+def resume_agent():
+    _pause_event.clear()
+    log("▶️  Agente retomado pelo usuário.")
+    return {"status": "resumed"}
+
+
+@app.get("/api/agent-state")
+def agent_state():
+    return {"is_running": is_running, "is_paused": _pause_event.is_set()}
+
+
 # ─── DASHBOARD HTML ───────────────────────────────────────
+BASE_DIR = Path(__file__).parent
+
 @app.get("/", response_class=HTMLResponse)
 def dashboard():
-    with open("templates/index.html", "r", encoding="utf-8") as f:
-        return f.read()
+    html_path = BASE_DIR / "templates" / "index.html"
+    return html_path.read_text(encoding="utf-8")
