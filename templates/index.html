@@ -196,7 +196,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
   <aside>
     <div class="logo">
       <div class="logo-mark"><i class="ti ti-mail-bolt"></i></div>
-      <div class="logo-name">Auto<span>Reply</span></div>
+      <div class="logo-name">Email<span>Automazer</span></div>
     </div>
 
     <div class="nav-section">
@@ -212,7 +212,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 
       <div class="field">
         <label>Assinatura</label>
-        <input type="text" id="signature" value="Felipe Nascimento" placeholder="Seu nome"/>
+        <input type="text" id="signature" value="" placeholder="Seu nome"/>
       </div>
 
       <div class="toggle-row">
@@ -306,7 +306,7 @@ let allEmails = [];
 // ─── RUN ────────────────────────────────────────────────
 async function runAgent() {
   const btn = document.getElementById('run-btn');
-  const sig = document.getElementById('signature').value.trim() || 'Felipe Nascimento';
+  const sig = document.getElementById('signature').value.trim() ;
   const dry = document.getElementById('dry-run').checked;
 
   btn.disabled = true;

@@ -34,7 +34,7 @@ is_running: bool = False
 app = FastAPI(title="Auto Reply Dashboard")
 
 # ─── AGENTE IA ────────────────────────────────────────────
-def build_agent(signature: str = "Felipe Nascimento") -> Agent:
+def build_agent(signature: str = "") -> Agent:
     return Agent(
         model=Groq(id="llama-3.3-70b-versatile"),
         markdown=False,
