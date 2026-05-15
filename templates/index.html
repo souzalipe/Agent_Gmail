@@ -196,7 +196,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
   <aside>
     <div class="logo">
       <div class="logo-mark"><i class="ti ti-mail-bolt"></i></div>
-      <div class="logo-name">Email<span>Automazer</span></div>
+      <div class="logo-name">Auto<span>Reply</span></div>
     </div>
 
     <div class="nav-section">
@@ -212,7 +212,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 
       <div class="field">
         <label>Assinatura</label>
-        <input type="text" id="signature" value="" placeholder="Seu nome"/>
+        <input type="text" id="signature" value="Felipe Nascimento" placeholder="Seu nome"/>
       </div>
 
       <div class="toggle-row">
@@ -225,6 +225,9 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 
       <button class="run-btn" id="run-btn" onclick="runAgent()">
         <i class="ti ti-bolt"></i> Processar Emails
+      </button>
+      <button class="run-btn" id="pause-btn" onclick="togglePause()" style="display:none;background:var(--amber);margin-top:6px">
+        <i class="ti ti-player-pause" id="pause-icon"></i> <span id="pause-label">Pausar Agente</span>
       </button>
     </div>
   </aside>
@@ -306,7 +309,7 @@ let allEmails = [];
 // ─── RUN ────────────────────────────────────────────────
 async function runAgent() {
   const btn = document.getElementById('run-btn');
-  const sig = document.getElementById('signature').value.trim() ;
+  const sig = document.getElementById('signature').value.trim() || 'Felipe Nascimento';
   const dry = document.getElementById('dry-run').checked;
 
   btn.disabled = true;
@@ -314,6 +317,7 @@ async function runAgent() {
   btn.innerHTML = '<i class="ti ti-loader"></i> Processando...';
 
   setStatus(true);
+  document.getElementById('pause-btn').style.display = '';
 
   try {
     const res = await fetch('/api/run', {
@@ -402,6 +406,29 @@ function addLog(msg, cls='') {
   div.textContent = msg;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
+}
+
+async function togglePause() {
+  const btn = document.getElementById("pause-btn");
+  const icon = document.getElementById("pause-icon");
+  const label = document.getElementById("pause-label");
+
+  const r = await fetch("/api/agent-state");
+  const state = await r.json();
+
+  if (state.is_paused) {
+    await fetch("/api/resume", { method: "POST" });
+    btn.style.background = "var(--amber)";
+    icon.className = "ti ti-player-pause";
+    label.textContent = "Pausar Agente";
+    addLog("▶️ Agente retomado", "");
+  } else {
+    await fetch("/api/pause", { method: "POST" });
+    btn.style.background = "var(--red-s)";
+    icon.className = "ti ti-player-play";
+    label.textContent = "Retomar Agente";
+    addLog("⏸️ Agente pausado", "skip");
+  }
 }
 
 function clearLog() {
@@ -510,6 +537,10 @@ function resetBtn() {
   btn.disabled = false;
   btn.classList.remove('running');
   btn.innerHTML = '<i class="ti ti-bolt"></i> Processar Emails';
+  document.getElementById('pause-btn').style.display = 'none';
+  document.getElementById('pause-icon').className = 'ti ti-player-pause';
+  document.getElementById('pause-label').textContent = 'Pausar Agente';
+  document.getElementById('pause-btn').style.background = 'var(--amber)';
 }
 </script>
 </body>
