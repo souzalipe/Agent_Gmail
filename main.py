@@ -25,6 +25,12 @@ load_dotenv()
 
 app = FastAPI(title="Auto Reply Dashboard")
 
+@app.on_event("startup")
+async def startup_event():
+    global is_running
+    is_running = False
+    _pause_event.clear()
+
 # ─── ESTADO GLOBAL (em memória) ───────────────────────────
 processed_emails: List[dict] = []
 run_log: List[str] = []
