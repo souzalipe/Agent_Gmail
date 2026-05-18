@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Plugify\\\\OneDrive\\\\Documentos\\\\Code\\\\vscode\\\\agno\\\\EmailAutomazer\" | Where-Object { $_.Name -ne \".venv\" } | Format-Table Name, PSIsContainer -AutoSize)"
+    ]
+  }
+}

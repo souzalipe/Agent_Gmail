@@ -28,6 +28,9 @@
   --amber-b:rgba(245,166,35,.18);
   --red:#f56565;
   --red-d:rgba(245,101,101,.08);
+  --purple:#a78bfa;
+  --purple-d:rgba(167,139,250,.10);
+  --purple-b:rgba(167,139,250,.22);
   --r:8px;--rs:5px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -55,6 +58,10 @@ aside{background:var(--bg2);border-right:1px solid var(--border);display:flex;fl
   color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:2px}
 .nav-item .ti{font-size:16px}
 .nav-item:hover,.nav-item.active{background:var(--blue-d);color:var(--blue)}
+.nav-item.important-nav:hover,.nav-item.important-nav.active{background:var(--purple-d);color:var(--purple)}
+.nav-badge{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:1px 6px;
+  border-radius:999px;background:var(--purple-d);color:var(--purple);border:1px solid var(--purple-b);
+  min-width:18px;text-align:center}
 
 .run-box{margin:auto 1rem 1rem;background:var(--blue-d);border:1px solid var(--blue-b);
   border-radius:var(--r);padding:1rem}
@@ -86,6 +93,10 @@ aside{background:var(--bg2);border-right:1px solid var(--border);display:flex;fl
 /* ── MAIN ── */
 main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 
+/* ── VIEWS ── */
+.view{display:none}
+.view.active{display:contents}
+
 /* ── TOP BAR ── */
 .topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
 .page-title{font-size:22px;font-weight:700;color:#e0eaff;letter-spacing:-.03em}
@@ -98,7 +109,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
 
 /* ── STAT CARDS ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem}
 .stat-val{font-size:28px;font-weight:700;color:#e0eaff;letter-spacing:-.04em;line-height:1}
 .stat-val b{color:var(--blue);font-weight:700}
@@ -121,6 +132,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .log-line.err{color:var(--red)}
 .log-line.skip{color:var(--amber)}
 .log-line.ai{color:var(--blue)}
+.log-line.imp{color:var(--purple)}
 
 /* ── EMAILS ── */
 .section-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
@@ -129,6 +141,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .count-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;
   background:var(--blue-d);color:var(--blue);border:1px solid var(--blue-b);
   padding:2px 8px;border-radius:999px}
+.count-badge.important{background:var(--purple-d);color:var(--purple);border-color:var(--purple-b)}
 .filter-bar{display:flex;gap:6px;flex-wrap:wrap}
 .filter-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;
   border-radius:999px;border:1px solid var(--border2);background:transparent;
@@ -143,12 +156,14 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .email-card.sent{border-left:2px solid var(--green)}
 .email-card.skipped{border-left:2px solid var(--muted2)}
 .email-card.dry{border-left:2px solid var(--amber)}
+.email-card.important{border-left:2px solid var(--purple)}
 
 .email-header{display:flex;align-items:center;gap:1rem;padding:.9rem 1.1rem;cursor:pointer;
   user-select:none}
 .email-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;
   background:var(--blue-d);color:var(--blue)}
+.email-avatar.imp{background:var(--purple-d);color:var(--purple)}
 .email-meta{flex:1;min-width:0}
 .email-from{font-size:13px;font-weight:600;color:#c8daf5;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -161,6 +176,7 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .badge-skip{background:var(--muted2);color:var(--muted);border:1px solid var(--border2)}
 .badge-dry{background:var(--amber-d);color:var(--amber);border:1px solid var(--amber-b)}
 .badge-ai{background:var(--blue-d);color:var(--blue);border:1px solid var(--blue-b)}
+.badge-imp{background:var(--purple-d);color:var(--purple);border:1px solid var(--purple-b)}
 .chevron{font-size:14px;color:var(--muted);transition:transform .2s}
 .chevron.open{transform:rotate(180deg)}
 
@@ -177,6 +193,18 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .pane-reply{font-size:12px;color:#a0c4e8;line-height:1.7;
   white-space:pre-wrap;max-height:200px;overflow-y:auto}
 .skip-reason{font-size:12px;color:var(--amber);font-style:italic}
+
+/* ── IMPORTANT VIEW ── */
+.important-banner{background:var(--purple-d);border:1px solid var(--purple-b);
+  border-radius:var(--r);padding:1.1rem 1.25rem;display:flex;align-items:center;gap:12px}
+.important-banner .ti{font-size:22px;color:var(--purple)}
+.important-banner-text h3{font-size:14px;font-weight:600;color:#d4bbff;margin-bottom:2px}
+.important-banner-text p{font-size:12px;color:var(--muted)}
+
+.importance-reason-box{background:var(--purple-d);border:1px solid var(--purple-b);
+  border-radius:var(--rs);padding:.6rem .9rem;margin-bottom:.5rem;
+  font-size:12px;color:#c4aaff;display:flex;align-items:center;gap:7px}
+.importance-reason-box .ti{font-size:13px;color:var(--purple)}
 
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--muted2)}
 .empty-state .ti{font-size:36px;display:block;margin-bottom:.75rem;color:var(--muted2)}
@@ -201,9 +229,19 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 
     <div class="nav-section">
       <div class="nav-label">menu</div>
-      <div class="nav-item active"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-      <div class="nav-item"><i class="ti ti-mail"></i> Emails</div>
-      <div class="nav-item"><i class="ti ti-terminal"></i> Logs</div>
+      <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
+        <i class="ti ti-layout-dashboard"></i> Dashboard
+      </div>
+      <div class="nav-item important-nav" id="nav-important" onclick="showView('important')">
+        <i class="ti ti-star"></i> Emails Importantes
+        <span class="nav-badge" id="nav-imp-count">0</span>
+      </div>
+      <div class="nav-item" id="nav-emails" onclick="showView('dashboard');setTimeout(()=>document.getElementById('emails-section').scrollIntoView({behavior:'smooth'}),100)">
+        <i class="ti ti-mail"></i> Emails
+      </div>
+      <div class="nav-item" id="nav-logs" onclick="showView('dashboard');setTimeout(()=>document.getElementById('log-section').scrollIntoView({behavior:'smooth'}),100)">
+        <i class="ti ti-terminal"></i> Logs
+      </div>
     </div>
 
     <!-- RUN BOX -->
@@ -235,68 +273,110 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
   <!-- MAIN -->
   <main>
 
-    <!-- TOP BAR -->
-    <div class="topbar">
-      <div>
-        <div class="page-title">Caixa de Entrada</div>
-        <div class="page-sub">Respostas automáticas com IA</div>
-      </div>
-      <div class="status-pill" id="status-pill">
-        <div class="sdot"></div> Aguardando
-      </div>
-    </div>
+    <!-- ═══ VIEW: DASHBOARD ═══ -->
+    <div class="view active" id="view-dashboard">
 
-    <!-- STATS -->
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-val" id="s-total">0</div>
-        <div class="stat-lbl">Emails processados</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--green)" id="s-sent">0</div>
-        <div class="stat-lbl">Respostas enviadas</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--amber)" id="s-skip">0</div>
-        <div class="stat-lbl">Emails ignorados</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--blue)" id="s-ai">0</div>
-        <div class="stat-lbl">Gerados pela IA</div>
-      </div>
-    </div>
-
-    <!-- LOG -->
-    <div class="log-box">
-      <div class="log-header">
-        <div class="log-title"><i class="ti ti-terminal-2"></i> Terminal de execução</div>
-        <button class="clear-btn" onclick="clearLog()"><i class="ti ti-trash"></i> limpar</button>
-      </div>
-      <div class="log-lines" id="log-lines"></div>
-    </div>
-
-    <!-- EMAILS -->
-    <div>
-      <div class="section-head" style="margin-bottom:.75rem">
-        <div class="section-title">
-          <i class="ti ti-inbox"></i> Emails
-          <span class="count-badge" id="count-badge">0</span>
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div>
+          <div class="page-title">Caixa de Entrada</div>
+          <div class="page-sub">Respostas automáticas com IA</div>
         </div>
-        <div class="filter-bar">
-          <button class="filter-btn active" onclick="setFilter('all',this)">todos</button>
-          <button class="filter-btn" onclick="setFilter('sent',this)">enviados</button>
-          <button class="filter-btn" onclick="setFilter('dry',this)">dry run</button>
-          <button class="filter-btn" onclick="setFilter('skipped',this)">ignorados</button>
+        <div class="status-pill" id="status-pill">
+          <div class="sdot"></div> Aguardando
         </div>
       </div>
 
-      <div class="emails-list" id="emails-list">
+      <!-- STATS -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-val" id="s-total">0</div>
+          <div class="stat-lbl">Emails processados</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" style="color:var(--green)" id="s-sent">0</div>
+          <div class="stat-lbl">Respostas enviadas</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" style="color:var(--amber)" id="s-skip">0</div>
+          <div class="stat-lbl">Emails ignorados</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" style="color:var(--blue)" id="s-ai">0</div>
+          <div class="stat-lbl">Gerados pela IA</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" style="color:var(--purple)" id="s-imp">0</div>
+          <div class="stat-lbl">Importantes</div>
+        </div>
+      </div>
+
+      <!-- LOG -->
+      <div class="log-box" id="log-section">
+        <div class="log-header">
+          <div class="log-title"><i class="ti ti-terminal-2"></i> Terminal de execução</div>
+          <button class="clear-btn" onclick="clearLog()"><i class="ti ti-trash"></i> limpar</button>
+        </div>
+        <div class="log-lines" id="log-lines"></div>
+      </div>
+
+      <!-- EMAILS -->
+      <div id="emails-section">
+        <div class="section-head" style="margin-bottom:.75rem">
+          <div class="section-title">
+            <i class="ti ti-inbox"></i> Emails
+            <span class="count-badge" id="count-badge">0</span>
+          </div>
+          <div class="filter-bar">
+            <button class="filter-btn active" onclick="setFilter('all',this)">todos</button>
+            <button class="filter-btn" onclick="setFilter('sent',this)">enviados</button>
+            <button class="filter-btn" onclick="setFilter('dry',this)">dry run</button>
+            <button class="filter-btn" onclick="setFilter('skipped',this)">ignorados</button>
+          </div>
+        </div>
+
+        <div class="emails-list" id="emails-list">
+          <div class="empty-state">
+            <i class="ti ti-inbox-off"></i>
+            <p>Nenhum email processado ainda.<br>Clique em <strong>Processar Emails</strong> para começar.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /view-dashboard -->
+
+    <!-- ═══ VIEW: EMAILS IMPORTANTES ═══ -->
+    <div class="view" id="view-important">
+
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div>
+          <div class="page-title" style="color:var(--purple)">
+            <i class="ti ti-star" style="font-size:20px;vertical-align:middle;margin-right:6px"></i>Emails Importantes
+          </div>
+          <div class="page-sub">Reuniões, prazos, eventos e solicitações urgentes detectados pela IA</div>
+        </div>
+        <span class="count-badge important" id="imp-count-badge">0</span>
+      </div>
+
+      <!-- BANNER INFO -->
+      <div class="important-banner">
+        <i class="ti ti-sparkles"></i>
+        <div class="important-banner-text">
+          <h3>Detecção automática com IA</h3>
+          <p>A IA analisa cada email e identifica: reuniões, eventos com data/hora, prazos, solicitações urgentes, tarefas atribuídas, contratos e entrevistas.</p>
+        </div>
+      </div>
+
+      <!-- LISTA -->
+      <div class="emails-list" id="important-list">
         <div class="empty-state">
-          <i class="ti ti-inbox-off"></i>
-          <p>Nenhum email processado ainda.<br>Clique em <strong>Processar Emails</strong> para começar.</p>
+          <i class="ti ti-star-off"></i>
+          <p>Nenhum email importante encontrado ainda.<br>Execute o agente para classificar seus emails.</p>
         </div>
       </div>
-    </div>
+
+    </div><!-- /view-important -->
 
   </main>
 </div>
@@ -305,6 +385,35 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 let currentFilter = 'all';
 let pollTimer = null;
 let allEmails = [];
+let allImportant = [];
+let currentView = 'dashboard';
+
+// ─── NAVIGATION ──────────────────────────────────────────
+function showView(view) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  document.getElementById('view-' + view).classList.add('active');
+  document.getElementById('nav-' + view).classList.add('active');
+
+  if (view === 'important') renderImportant();
+}
+
+// ─── SYNC STATE ──────────────────────────────────────────
+async function syncState() {
+  try {
+    const res = await fetch('/api/status');
+    const s = await res.json();
+    if (!s.is_running) {
+      resetBtn();
+    } else {
+      setStatus(true);
+      document.getElementById('pause-btn').style.display = '';
+      pollTimer = setInterval(poll, 1500);
+    }
+  } catch(e) {}
+}
 
 // ─── RUN ────────────────────────────────────────────────
 async function runAgent() {
@@ -343,20 +452,27 @@ async function runAgent() {
 // ─── POLL ────────────────────────────────────────────────
 async function poll() {
   try {
-    const [statusRes, emailsRes, logRes] = await Promise.all([
+    const [statusRes, emailsRes, logRes, impRes] = await Promise.all([
       fetch('/api/status'),
       fetch('/api/emails'),
       fetch('/api/log'),
+      fetch('/api/important-emails'),
     ]);
 
-    const status  = await statusRes.json();
-    const emails  = await emailsRes.json();
-    const logs    = await logRes.json();
+    const status    = await statusRes.json();
+    const emails    = await emailsRes.json();
+    const logs      = await logRes.json();
+    const important = await impRes.json();
+
+    allEmails    = emails;
+    allImportant = important;
 
     updateStats(status, emails);
     renderLog(logs);
-    allEmails = emails;
     renderEmails();
+    updateImportantCount(important.length);
+
+    if (currentView === 'important') renderImportant();
 
     if (!status.is_running) {
       clearInterval(pollTimer);
@@ -374,8 +490,14 @@ function updateStats(status, emails) {
   document.getElementById('s-sent').textContent  = status.sent;
   document.getElementById('s-skip').textContent  = status.skipped;
   const ai = emails.filter(e => e.reply && !e.skipped).length;
-  document.getElementById('s-ai').textContent = ai;
+  document.getElementById('s-ai').textContent  = ai;
+  document.getElementById('s-imp').textContent = status.important || 0;
   document.getElementById('count-badge').textContent = status.total;
+}
+
+function updateImportantCount(n) {
+  document.getElementById('nav-imp-count').textContent = n;
+  document.getElementById('imp-count-badge').textContent = n;
 }
 
 // ─── LOG ─────────────────────────────────────────────────
@@ -392,10 +514,11 @@ function renderLog(logs) {
 }
 
 function classifyLog(line) {
+  if (line.includes('⭐')) return 'imp';
   if (line.includes('✅') || line.includes('enviada')) return 'ok';
   if (line.includes('❌')) return 'err';
   if (line.includes('⏭️') || line.includes('Ignorado')) return 'skip';
-  if (line.includes('🤖') || line.includes('IA')) return 'ai';
+  if (line.includes('🤖') || line.includes('IA') || line.includes('🔍')) return 'ai';
   return '';
 }
 
@@ -409,24 +532,24 @@ function addLog(msg, cls='') {
 }
 
 async function togglePause() {
-  const btn = document.getElementById("pause-btn");
-  const icon = document.getElementById("pause-icon");
+  const btn   = document.getElementById("pause-btn");
+  const icon  = document.getElementById("pause-icon");
   const label = document.getElementById("pause-label");
 
-  const r = await fetch("/api/agent-state");
+  const r     = await fetch("/api/agent-state");
   const state = await r.json();
 
   if (state.is_paused) {
     await fetch("/api/resume", { method: "POST" });
-    btn.style.background = "var(--amber)";
-    icon.className = "ti ti-player-pause";
-    label.textContent = "Pausar Agente";
+    btn.style.background   = "var(--amber)";
+    icon.className         = "ti ti-player-pause";
+    label.textContent      = "Pausar Agente";
     addLog("▶️ Agente retomado", "");
   } else {
     await fetch("/api/pause", { method: "POST" });
-    btn.style.background = "var(--red-s)";
-    icon.className = "ti ti-player-play";
-    label.textContent = "Retomar Agente";
+    btn.style.background   = "var(--red-s)";
+    icon.className         = "ti ti-player-play";
+    label.textContent      = "Retomar Agente";
     addLog("⏸️ Agente pausado", "skip");
   }
 }
@@ -435,7 +558,7 @@ function clearLog() {
   document.getElementById('log-lines').innerHTML = '';
 }
 
-// ─── EMAILS ──────────────────────────────────────────────
+// ─── EMAILS (dashboard) ───────────────────────────────────
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -459,10 +582,78 @@ function renderEmails() {
     return;
   }
 
-  list.innerHTML = filtered.map((e, i) => emailCard(e, i)).join('');
+  list.innerHTML = filtered.map((e, i) => emailCard(e, i, 'email')).join('');
 }
 
-function emailCard(e, i) {
+// ─── EMAILS IMPORTANTES ───────────────────────────────────
+function renderImportant() {
+  const list = document.getElementById('important-list');
+
+  if (!allImportant.length) {
+    list.innerHTML = `<div class="empty-state">
+      <i class="ti ti-star-off"></i>
+      <p>Nenhum email importante encontrado ainda.<br>Execute o agente para classificar seus emails.</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = allImportant.map((e, i) => importantCard(e, i)).join('');
+}
+
+function importantCard(e, i) {
+  const initials = (e.from_email || '?').charAt(0).toUpperCase();
+  const statusBadge = e.sent
+    ? `<span class="badge badge-sent">✓ enviado</span>`
+    : e.reply
+      ? `<span class="badge badge-dry">dry run</span>`
+      : '';
+
+  const bodyContent = `
+    <div class="email-pane" style="grid-column:span 2">
+      ${e.importance_reason ? `<div class="importance-reason-box"><i class="ti ti-star-filled"></i>${esc(e.importance_reason)}</div>` : ''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:.5rem">
+        <div>
+          <div class="pane-label"><i class="ti ti-mail-opened"></i> mensagem recebida</div>
+          <div class="pane-text">${esc(e.body || '')}</div>
+        </div>
+        <div style="border-left:1px solid var(--border);padding-left:1rem">
+          <div class="pane-label"><i class="ti ti-robot"></i> resposta gerada</div>
+          <div class="pane-reply">${e.reply ? esc(e.reply) : '<em style="color:var(--muted2)">Nenhuma resposta gerada</em>'}</div>
+        </div>
+      </div>
+    </div>`;
+
+  return `
+  <div class="email-card important" id="imp-card-${i}">
+    <div class="email-header" onclick="toggleImp(${i})">
+      <div class="email-avatar imp">${initials}</div>
+      <div class="email-meta">
+        <div class="email-from">${esc(e.from_email)}</div>
+        <div class="email-subj">${esc(e.subject)}</div>
+      </div>
+      <div class="email-badges">
+        <span class="badge badge-imp">⭐ importante</span>
+        ${statusBadge}
+        <i class="ti ti-chevron-down chevron" id="imp-chev-${i}"></i>
+      </div>
+    </div>
+    <div class="email-body hidden" id="imp-body-${i}" style="display:none">
+      ${bodyContent}
+    </div>
+  </div>`;
+}
+
+function toggleImp(i) {
+  const body = document.getElementById('imp-body-' + i);
+  const chev = document.getElementById('imp-chev-' + i);
+  if (!body) return;
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'grid';
+  chev.classList.toggle('open', !open);
+}
+
+// ─── SHARED EMAIL CARD ────────────────────────────────────
+function emailCard(e, i, prefix) {
   const initials = (e.from_email || '?').charAt(0).toUpperCase();
   const cardClass = e.skipped ? 'skipped' : e.sent ? 'sent' : e.reply ? 'dry' : '';
 
@@ -473,6 +664,8 @@ function emailCard(e, i) {
       : e.reply
         ? `<span class="badge badge-dry">dry run</span>`
         : `<span class="badge badge-ai">gerado</span>`;
+
+  const impBadge = e.important ? `<span class="badge badge-imp">⭐</span>` : '';
 
   const bodyContent = e.skipped
     ? `<div class="email-pane" style="grid-column:span 2">
@@ -497,6 +690,7 @@ function emailCard(e, i) {
         <div class="email-subj">${esc(e.subject)}</div>
       </div>
       <div class="email-badges">
+        ${impBadge}
         ${badge}
         <i class="ti ti-chevron-down chevron" id="chev-${i}"></i>
       </div>
@@ -542,6 +736,19 @@ function resetBtn() {
   document.getElementById('pause-label').textContent = 'Pausar Agente';
   document.getElementById('pause-btn').style.background = 'var(--amber)';
 }
+
+// ─── INIT ────────────────────────────────────────────────
+syncState();
+setInterval(async () => {
+  if (!pollTimer) {
+    try {
+      const [impRes] = await Promise.all([fetch('/api/important-emails')]);
+      allImportant = await impRes.json();
+      updateImportantCount(allImportant.length);
+      if (currentView === 'important') renderImportant();
+    } catch(e) {}
+  }
+}, 30000);
 </script>
 </body>
 </html>

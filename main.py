@@ -4,6 +4,7 @@ import smtplib
 import email
 import os
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import List, Optional
@@ -33,6 +34,7 @@ async def startup_event():
 
 # ─── ESTADO GLOBAL (em memória) ───────────────────────────
 processed_emails: List[dict] = []
+important_emails: List[dict] = []
 run_log: List[str] = []
 is_running: bool = False
 _pause_event = threading.Event()  # set() = pausado, clear() = rodando
@@ -79,6 +81,8 @@ class EmailRecord(BaseModel):
     sent: bool = False
     skipped: bool = False
     skip_reason: Optional[str] = None
+    important: bool = False
+    importance_reason: Optional[str] = None
     timestamp: str
 
 
@@ -104,13 +108,45 @@ def should_skip(from_email: str, body: str) -> Optional[str]:
 
 
 # ─── TAREFA EM BACKGROUND ─────────────────────────────────
-def process_emails_task(signature: str, dry_run: bool):
-    global is_running, processed_emails, run_log
+def classify_importance(agent: Agent, body: str, subject: str) -> tuple[bool, Optional[str]]:
+    prompt = f"""Analise o email abaixo e responda APENAS em JSON válido, sem texto extra.
 
-    global is_running, processed_emails, run_log
+Formato exato: {{"importante": true, "motivo": "razão em português"}} ou {{"importante": false, "motivo": null}}
+
+Critérios para importante=true (basta um):
+- Reunião, videoconferência ou encontro agendado
+- Evento com data e hora
+- Prazo ou deadline
+- Solicitação urgente
+- Tarefa atribuída à pessoa
+- Contrato, proposta ou acordo
+- Entrevista ou processo seletivo
+- Pagamento ou cobrança com vencimento
+
+ASSUNTO: {subject}
+EMAIL:
+{body[:1500]}
+"""
+    try:
+        result = agent.run(prompt)
+        text = result.content.strip()
+        match = re.search(r'\{.*?\}', text, re.DOTALL)
+        if match:
+            data = json.loads(match.group())
+            if data.get("importante"):
+                return True, data.get("motivo") or "Email importante"
+    except Exception:
+        pass
+    return False, None
+
+
+def process_emails_task(signature: str, dry_run: bool):
+    global is_running, processed_emails, important_emails, run_log
+
     is_running = True
     _pause_event.clear()
     processed_emails = []
+    important_emails = []
     run_log = []
 
     EMAIL_USER = os.getenv("EMAIL_USER")
@@ -200,6 +236,13 @@ EMAIL RECEBIDO:
                 resposta_texto = resposta.content
                 record.reply = resposta_texto
 
+                log("🔍 Classificando importância...")
+                is_important, importance_reason = classify_importance(agent, body, subject)
+                if is_important:
+                    record.important = True
+                    record.importance_reason = importance_reason
+                    log(f"⭐ Email importante: {importance_reason}")
+
                 if dry_run:
                     log("📝 [DRY RUN] Resposta gerada, envio pulado.")
                     record.sent = False
@@ -223,7 +266,10 @@ EMAIL RECEBIDO:
                     except Exception as e:
                         log(f"❌ Erro ao enviar: {e}")
 
-                processed_emails.append(record.model_dump())
+                record_dict = record.model_dump()
+                processed_emails.append(record_dict)
+                if record.important:
+                    important_emails.append(record_dict)
 
         mail.logout()
         log("✅ Processamento concluído!")
@@ -251,7 +297,13 @@ def status():
         "total": len(processed_emails),
         "sent": sum(1 for e in processed_emails if e.get("sent")),
         "skipped": sum(1 for e in processed_emails if e.get("skipped")),
+        "important": len(important_emails),
     }
+
+
+@app.get("/api/important-emails")
+def get_important_emails():
+    return important_emails
 
 
 @app.get("/api/emails")
