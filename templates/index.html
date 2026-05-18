@@ -31,6 +31,9 @@
   --purple:#a78bfa;
   --purple-d:rgba(167,139,250,.10);
   --purple-b:rgba(167,139,250,.22);
+  --teal:#2dd4bf;
+  --teal-d:rgba(45,212,191,.08);
+  --teal-b:rgba(45,212,191,.18);
   --r:8px;--rs:5px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -59,9 +62,17 @@ aside{background:var(--bg2);border-right:1px solid var(--border);display:flex;fl
 .nav-item .ti{font-size:16px}
 .nav-item:hover,.nav-item.active{background:var(--blue-d);color:var(--blue)}
 .nav-item.important-nav:hover,.nav-item.important-nav.active{background:var(--purple-d);color:var(--purple)}
+.nav-item.history-nav:hover,.nav-item.history-nav.active{background:var(--teal-d);color:var(--teal)}
 .nav-badge{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:1px 6px;
   border-radius:999px;background:var(--purple-d);color:var(--purple);border:1px solid var(--purple-b);
   min-width:18px;text-align:center}
+.nav-badge.teal{background:var(--teal-d);color:var(--teal);border-color:var(--teal-b)}
+
+/* DB status chip */
+.db-chip{margin:1rem 1rem 0;padding:6px 10px;border-radius:var(--rs);
+  font-family:'IBM Plex Mono',monospace;font-size:10px;display:flex;align-items:center;gap:6px}
+.db-chip.ok{background:var(--green-d);color:var(--green);border:1px solid var(--green-b)}
+.db-chip.off{background:var(--muted2);color:var(--muted);border:1px solid var(--border)}
 
 .run-box{margin:auto 1rem 1rem;background:var(--blue-d);border:1px solid var(--blue-b);
   border-radius:var(--r);padding:1rem}
@@ -112,7 +123,6 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem}
 .stat-val{font-size:28px;font-weight:700;color:#e0eaff;letter-spacing:-.04em;line-height:1}
-.stat-val b{color:var(--blue);font-weight:700}
 .stat-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted2);
   text-transform:uppercase;letter-spacing:.12em;margin-top:5px}
 
@@ -136,12 +146,12 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 
 /* ── EMAILS ── */
 .section-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
-.section-title{font-size:14px;font-weight:600;color:#b0c8f8;
-  display:flex;align-items:center;gap:7px}
+.section-title{font-size:14px;font-weight:600;color:#b0c8f8;display:flex;align-items:center;gap:7px}
 .count-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;
   background:var(--blue-d);color:var(--blue);border:1px solid var(--blue-b);
   padding:2px 8px;border-radius:999px}
 .count-badge.important{background:var(--purple-d);color:var(--purple);border-color:var(--purple-b)}
+.count-badge.teal{background:var(--teal-d);color:var(--teal);border-color:var(--teal-b)}
 .filter-bar{display:flex;gap:6px;flex-wrap:wrap}
 .filter-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;
   border-radius:999px;border:1px solid var(--border2);background:transparent;
@@ -158,20 +168,17 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .email-card.dry{border-left:2px solid var(--amber)}
 .email-card.important{border-left:2px solid var(--purple)}
 
-.email-header{display:flex;align-items:center;gap:1rem;padding:.9rem 1.1rem;cursor:pointer;
-  user-select:none}
+.email-header{display:flex;align-items:center;gap:1rem;padding:.9rem 1.1rem;cursor:pointer;user-select:none}
 .email-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;
   background:var(--blue-d);color:var(--blue)}
 .email-avatar.imp{background:var(--purple-d);color:var(--purple)}
 .email-meta{flex:1;min-width:0}
-.email-from{font-size:13px;font-weight:600;color:#c8daf5;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.email-subj{font-size:12px;color:var(--muted);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-from{font-size:13px;font-weight:600;color:#c8daf5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-subj{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-ts{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px}
 .email-badges{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 9px;
-  border-radius:999px;letter-spacing:.04em}
+.badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 9px;border-radius:999px;letter-spacing:.04em}
 .badge-sent{background:var(--green-d);color:var(--green);border:1px solid var(--green-b)}
 .badge-skip{background:var(--muted2);color:var(--muted);border:1px solid var(--border2)}
 .badge-dry{background:var(--amber-d);color:var(--amber);border:1px solid var(--amber-b)}
@@ -180,18 +187,14 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .chevron{font-size:14px;color:var(--muted);transition:transform .2s}
 .chevron.open{transform:rotate(180deg)}
 
-.email-body{display:none;border-top:1px solid var(--border);
-  display:grid;grid-template-columns:1fr 1fr;gap:0}
-.email-body.hidden{display:none}
+.email-body{border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:0}
 .email-pane{padding:1rem 1.1rem}
 .email-pane+.email-pane{border-left:1px solid var(--border)}
 .pane-label{font-family:'IBM Plex Mono',monospace;font-size:10px;
   color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;
   display:flex;align-items:center;gap:6px}
-.pane-text{font-size:12px;color:#7090b8;line-height:1.7;
-  white-space:pre-wrap;max-height:200px;overflow-y:auto}
-.pane-reply{font-size:12px;color:#a0c4e8;line-height:1.7;
-  white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.pane-text{font-size:12px;color:#7090b8;line-height:1.7;white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.pane-reply{font-size:12px;color:#a0c4e8;line-height:1.7;white-space:pre-wrap;max-height:200px;overflow-y:auto}
 .skip-reason{font-size:12px;color:var(--amber);font-style:italic}
 
 /* ── IMPORTANT VIEW ── */
@@ -200,12 +203,24 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 .important-banner .ti{font-size:22px;color:var(--purple)}
 .important-banner-text h3{font-size:14px;font-weight:600;color:#d4bbff;margin-bottom:2px}
 .important-banner-text p{font-size:12px;color:var(--muted)}
-
 .importance-reason-box{background:var(--purple-d);border:1px solid var(--purple-b);
   border-radius:var(--rs);padding:.6rem .9rem;margin-bottom:.5rem;
   font-size:12px;color:#c4aaff;display:flex;align-items:center;gap:7px}
 .importance-reason-box .ti{font-size:13px;color:var(--purple)}
 
+/* ── HISTORY VIEW ── */
+.history-banner{background:var(--teal-d);border:1px solid var(--teal-b);
+  border-radius:var(--r);padding:1.1rem 1.25rem;display:flex;align-items:center;gap:12px}
+.history-banner .ti{font-size:22px;color:var(--teal)}
+.history-banner-text h3{font-size:14px;font-weight:600;color:#99f6e4;margin-bottom:2px}
+.history-banner-text p{font-size:12px;color:var(--muted)}
+.history-filter-bar{display:flex;gap:6px;flex-wrap:wrap}
+.h-filter-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 12px;
+  border-radius:999px;border:1px solid var(--border2);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all .15s;letter-spacing:.06em}
+.h-filter-btn:hover,.h-filter-btn.active{border-color:var(--teal);color:var(--teal);background:var(--teal-d)}
+
+/* ── EMPTY STATE ── */
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--muted2)}
 .empty-state .ti{font-size:36px;display:block;margin-bottom:.75rem;color:var(--muted2)}
 .empty-state p{font-size:13px}
@@ -233,26 +248,35 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
         <i class="ti ti-layout-dashboard"></i> Dashboard
       </div>
       <div class="nav-item important-nav" id="nav-important" onclick="showView('important')">
-        <i class="ti ti-star"></i> Emails Importantes
+        <i class="ti ti-star"></i> Importantes
         <span class="nav-badge" id="nav-imp-count">0</span>
       </div>
-      <div class="nav-item" id="nav-emails" onclick="showView('dashboard');setTimeout(()=>document.getElementById('emails-section').scrollIntoView({behavior:'smooth'}),100)">
+      <div class="nav-item history-nav" id="nav-history" onclick="showView('history')">
+        <i class="ti ti-database"></i> Histórico
+        <span class="nav-badge teal" id="nav-hist-count">0</span>
+      </div>
+      <div class="nav-item" id="nav-emails"
+           onclick="showView('dashboard');setTimeout(()=>document.getElementById('emails-section').scrollIntoView({behavior:'smooth'}),100)">
         <i class="ti ti-mail"></i> Emails
       </div>
-      <div class="nav-item" id="nav-logs" onclick="showView('dashboard');setTimeout(()=>document.getElementById('log-section').scrollIntoView({behavior:'smooth'}),100)">
+      <div class="nav-item" id="nav-logs"
+           onclick="showView('dashboard');setTimeout(()=>document.getElementById('log-section').scrollIntoView({behavior:'smooth'}),100)">
         <i class="ti ti-terminal"></i> Logs
       </div>
+    </div>
+
+    <!-- DB status -->
+    <div class="db-chip off" id="db-chip">
+      <i class="ti ti-database-off"></i> Banco desconectado
     </div>
 
     <!-- RUN BOX -->
     <div class="run-box">
       <h4><i class="ti ti-player-play" style="margin-right:5px"></i>Executar Agente</h4>
-
       <div class="field">
         <label>Assinatura</label>
         <input type="text" id="signature" value="Felipe Nascimento" placeholder="Seu nome"/>
       </div>
-
       <div class="toggle-row">
         <span class="toggle-label">Dry Run (não envia)</span>
         <label class="toggle">
@@ -260,12 +284,13 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
           <span class="slider"></span>
         </label>
       </div>
-
       <button class="run-btn" id="run-btn" onclick="runAgent()">
         <i class="ti ti-bolt"></i> Processar Emails
       </button>
-      <button class="run-btn" id="pause-btn" onclick="togglePause()" style="display:none;background:var(--amber);margin-top:6px">
-        <i class="ti ti-player-pause" id="pause-icon"></i> <span id="pause-label">Pausar Agente</span>
+      <button class="run-btn" id="pause-btn" onclick="togglePause()"
+              style="display:none;background:var(--amber);margin-top:6px">
+        <i class="ti ti-player-pause" id="pause-icon"></i>
+        <span id="pause-label">Pausar Agente</span>
       </button>
     </div>
   </aside>
@@ -276,7 +301,6 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
     <!-- ═══ VIEW: DASHBOARD ═══ -->
     <div class="view active" id="view-dashboard">
 
-      <!-- TOP BAR -->
       <div class="topbar">
         <div>
           <div class="page-title">Caixa de Entrada</div>
@@ -287,31 +311,29 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
         </div>
       </div>
 
-      <!-- STATS -->
       <div class="stats">
         <div class="stat">
           <div class="stat-val" id="s-total">0</div>
-          <div class="stat-lbl">Emails processados</div>
+          <div class="stat-lbl">Processados</div>
         </div>
         <div class="stat">
           <div class="stat-val" style="color:var(--green)" id="s-sent">0</div>
-          <div class="stat-lbl">Respostas enviadas</div>
+          <div class="stat-lbl">Enviados</div>
         </div>
         <div class="stat">
           <div class="stat-val" style="color:var(--amber)" id="s-skip">0</div>
-          <div class="stat-lbl">Emails ignorados</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val" style="color:var(--blue)" id="s-ai">0</div>
-          <div class="stat-lbl">Gerados pela IA</div>
+          <div class="stat-lbl">Ignorados</div>
         </div>
         <div class="stat">
           <div class="stat-val" style="color:var(--purple)" id="s-imp">0</div>
           <div class="stat-lbl">Importantes</div>
         </div>
+        <div class="stat">
+          <div class="stat-val" style="color:var(--teal)" id="s-db">0</div>
+          <div class="stat-lbl">No Banco</div>
+        </div>
       </div>
 
-      <!-- LOG -->
       <div class="log-box" id="log-section">
         <div class="log-header">
           <div class="log-title"><i class="ti ti-terminal-2"></i> Terminal de execução</div>
@@ -320,11 +342,10 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
         <div class="log-lines" id="log-lines"></div>
       </div>
 
-      <!-- EMAILS -->
       <div id="emails-section">
         <div class="section-head" style="margin-bottom:.75rem">
           <div class="section-title">
-            <i class="ti ti-inbox"></i> Emails
+            <i class="ti ti-inbox"></i> Sessão atual
             <span class="count-badge" id="count-badge">0</span>
           </div>
           <div class="filter-bar">
@@ -334,7 +355,6 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
             <button class="filter-btn" onclick="setFilter('skipped',this)">ignorados</button>
           </div>
         </div>
-
         <div class="emails-list" id="emails-list">
           <div class="empty-state">
             <i class="ti ti-inbox-off"></i>
@@ -348,7 +368,6 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
     <!-- ═══ VIEW: EMAILS IMPORTANTES ═══ -->
     <div class="view" id="view-important">
 
-      <!-- TOP BAR -->
       <div class="topbar">
         <div>
           <div class="page-title" style="color:var(--purple)">
@@ -359,7 +378,6 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
         <span class="count-badge important" id="imp-count-badge">0</span>
       </div>
 
-      <!-- BANNER INFO -->
       <div class="important-banner">
         <i class="ti ti-sparkles"></i>
         <div class="important-banner-text">
@@ -368,7 +386,6 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
         </div>
       </div>
 
-      <!-- LISTA -->
       <div class="emails-list" id="important-list">
         <div class="empty-state">
           <i class="ti ti-star-off"></i>
@@ -378,36 +395,81 @@ main{padding:2rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.5rem}
 
     </div><!-- /view-important -->
 
+    <!-- ═══ VIEW: HISTÓRICO ═══ -->
+    <div class="view" id="view-history">
+
+      <div class="topbar">
+        <div>
+          <div class="page-title" style="color:var(--teal)">
+            <i class="ti ti-database" style="font-size:20px;vertical-align:middle;margin-right:6px"></i>Histórico
+          </div>
+          <div class="page-sub">Todos os emails processados, salvos no banco Supabase</div>
+        </div>
+        <span class="count-badge teal" id="hist-count-badge">0</span>
+      </div>
+
+      <div class="history-banner">
+        <i class="ti ti-database"></i>
+        <div class="history-banner-text">
+          <h3>Persistência com Supabase (PostgreSQL)</h3>
+          <p>Os emails são salvos automaticamente a cada execução. O histórico persiste mesmo após o servidor reiniciar no Render.</p>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin-bottom:.75rem">
+        <div class="section-title">
+          <i class="ti ti-history"></i> Todos os registros
+        </div>
+        <div class="history-filter-bar">
+          <button class="h-filter-btn active" onclick="setHistFilter('all',this)">todos</button>
+          <button class="h-filter-btn" onclick="setHistFilter('sent',this)">enviados</button>
+          <button class="h-filter-btn" onclick="setHistFilter('important',this)">importantes</button>
+          <button class="h-filter-btn" onclick="setHistFilter('skipped',this)">ignorados</button>
+        </div>
+      </div>
+
+      <div class="emails-list" id="history-list">
+        <div class="empty-state">
+          <i class="ti ti-database-off"></i>
+          <p>Nenhum registro no banco ainda.<br>Configure o <strong>DATABASE_URL</strong> e execute o agente.</p>
+        </div>
+      </div>
+
+    </div><!-- /view-history -->
+
   </main>
 </div>
 
 <script>
-let currentFilter = 'all';
-let pollTimer = null;
-let allEmails = [];
-let allImportant = [];
-let currentView = 'dashboard';
+let currentFilter  = 'all';
+let currentHFilter = 'all';
+let pollTimer      = null;
+let allEmails      = [];
+let allImportant   = [];
+let allHistory     = [];
+let currentView    = 'dashboard';
 
 // ─── NAVIGATION ──────────────────────────────────────────
 function showView(view) {
   currentView = view;
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
   document.getElementById('view-' + view).classList.add('active');
-  document.getElementById('nav-' + view).classList.add('active');
-
+  const navEl = document.getElementById('nav-' + view);
+  if (navEl) navEl.classList.add('active');
   if (view === 'important') renderImportant();
+  if (view === 'history')   loadHistory();
 }
 
-// ─── SYNC STATE ──────────────────────────────────────────
+// ─── SYNC ────────────────────────────────────────────────
 async function syncState() {
   try {
     const res = await fetch('/api/status');
-    const s = await res.json();
-    if (!s.is_running) {
-      resetBtn();
-    } else {
+    const s   = await res.json();
+    updateDbChip(s.db_connected);
+    updateHistCount(s.db_total);
+    if (!s.is_running) { resetBtn(); }
+    else {
       setStatus(true);
       document.getElementById('pause-btn').style.display = '';
       pollTimer = setInterval(poll, 1500);
@@ -415,7 +477,7 @@ async function syncState() {
   } catch(e) {}
 }
 
-// ─── RUN ────────────────────────────────────────────────
+// ─── RUN ─────────────────────────────────────────────────
 async function runAgent() {
   const btn = document.getElementById('run-btn');
   const sig = document.getElementById('signature').value.trim() || 'Felipe Nascimento';
@@ -424,7 +486,6 @@ async function runAgent() {
   btn.disabled = true;
   btn.classList.add('running');
   btn.innerHTML = '<i class="ti ti-loader"></i> Processando...';
-
   setStatus(true);
   document.getElementById('pause-btn').style.display = '';
 
@@ -437,32 +498,26 @@ async function runAgent() {
     if (!res.ok) {
       const err = await res.json();
       addLog('❌ ' + (err.detail || 'Erro ao iniciar'), 'err');
-      resetBtn();
-      return;
+      resetBtn(); return;
     }
   } catch(e) {
     addLog('❌ Não foi possível conectar ao servidor', 'err');
-    resetBtn();
-    return;
+    resetBtn(); return;
   }
-
   pollTimer = setInterval(poll, 1500);
 }
 
 // ─── POLL ────────────────────────────────────────────────
 async function poll() {
   try {
-    const [statusRes, emailsRes, logRes, impRes] = await Promise.all([
-      fetch('/api/status'),
-      fetch('/api/emails'),
-      fetch('/api/log'),
-      fetch('/api/important-emails'),
+    const [sR, eR, lR, iR] = await Promise.all([
+      fetch('/api/status'), fetch('/api/emails'),
+      fetch('/api/log'),    fetch('/api/important-emails'),
     ]);
-
-    const status    = await statusRes.json();
-    const emails    = await emailsRes.json();
-    const logs      = await logRes.json();
-    const important = await impRes.json();
+    const status    = await sR.json();
+    const emails    = await eR.json();
+    const logs      = await lR.json();
+    const important = await iR.json();
 
     allEmails    = emails;
     allImportant = important;
@@ -471,33 +526,47 @@ async function poll() {
     renderLog(logs);
     renderEmails();
     updateImportantCount(important.length);
-
+    updateDbChip(status.db_connected);
+    updateHistCount(status.db_total);
     if (currentView === 'important') renderImportant();
 
     if (!status.is_running) {
-      clearInterval(pollTimer);
-      setStatus(false);
-      resetBtn();
+      clearInterval(pollTimer); pollTimer = null;
+      setStatus(false); resetBtn();
+      if (currentView === 'history') loadHistory();
     }
-  } catch(e) {
-    console.error(e);
-  }
+  } catch(e) { console.error(e); }
 }
 
-// ─── STATS ──────────────────────────────────────────────
+// ─── STATS ───────────────────────────────────────────────
 function updateStats(status, emails) {
   document.getElementById('s-total').textContent = status.total;
   document.getElementById('s-sent').textContent  = status.sent;
   document.getElementById('s-skip').textContent  = status.skipped;
-  const ai = emails.filter(e => e.reply && !e.skipped).length;
-  document.getElementById('s-ai').textContent  = ai;
-  document.getElementById('s-imp').textContent = status.important || 0;
+  document.getElementById('s-imp').textContent   = status.important || 0;
+  document.getElementById('s-db').textContent    = status.db_total  || 0;
   document.getElementById('count-badge').textContent = status.total;
 }
 
 function updateImportantCount(n) {
-  document.getElementById('nav-imp-count').textContent = n;
+  document.getElementById('nav-imp-count').textContent  = n;
   document.getElementById('imp-count-badge').textContent = n;
+}
+
+function updateHistCount(n) {
+  document.getElementById('nav-hist-count').textContent  = n;
+  document.getElementById('hist-count-badge').textContent = n;
+}
+
+function updateDbChip(connected) {
+  const chip = document.getElementById('db-chip');
+  if (connected) {
+    chip.className = 'db-chip ok';
+    chip.innerHTML = '<i class="ti ti-database"></i> Banco conectado';
+  } else {
+    chip.className = 'db-chip off';
+    chip.innerHTML = '<i class="ti ti-database-off"></i> Banco desconectado';
+  }
 }
 
 // ─── LOG ─────────────────────────────────────────────────
@@ -531,34 +600,30 @@ function addLog(msg, cls='') {
   box.scrollTop = box.scrollHeight;
 }
 
+function clearLog() { document.getElementById('log-lines').innerHTML = ''; }
+
 async function togglePause() {
-  const btn   = document.getElementById("pause-btn");
-  const icon  = document.getElementById("pause-icon");
-  const label = document.getElementById("pause-label");
-
-  const r     = await fetch("/api/agent-state");
+  const btn   = document.getElementById('pause-btn');
+  const icon  = document.getElementById('pause-icon');
+  const label = document.getElementById('pause-label');
+  const r     = await fetch('/api/agent-state');
   const state = await r.json();
-
   if (state.is_paused) {
-    await fetch("/api/resume", { method: "POST" });
-    btn.style.background   = "var(--amber)";
-    icon.className         = "ti ti-player-pause";
-    label.textContent      = "Pausar Agente";
-    addLog("▶️ Agente retomado", "");
+    await fetch('/api/resume', {method:'POST'});
+    btn.style.background = 'var(--amber)';
+    icon.className = 'ti ti-player-pause';
+    label.textContent = 'Pausar Agente';
+    addLog('▶️ Agente retomado', '');
   } else {
-    await fetch("/api/pause", { method: "POST" });
-    btn.style.background   = "var(--red-s)";
-    icon.className         = "ti ti-player-play";
-    label.textContent      = "Retomar Agente";
-    addLog("⏸️ Agente pausado", "skip");
+    await fetch('/api/pause', {method:'POST'});
+    btn.style.background = 'var(--red-s)';
+    icon.className = 'ti ti-player-play';
+    label.textContent = 'Retomar Agente';
+    addLog('⏸️ Agente pausado', 'skip');
   }
 }
 
-function clearLog() {
-  document.getElementById('log-lines').innerHTML = '';
-}
-
-// ─── EMAILS (dashboard) ───────────────────────────────────
+// ─── EMAILS (sessão) ─────────────────────────────────────
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -568,105 +633,108 @@ function setFilter(f, btn) {
 
 function renderEmails() {
   const list = document.getElementById('emails-list');
-
   let filtered = allEmails;
   if (currentFilter === 'sent')    filtered = allEmails.filter(e => e.sent);
   if (currentFilter === 'dry')     filtered = allEmails.filter(e => e.reply && !e.sent && !e.skipped);
   if (currentFilter === 'skipped') filtered = allEmails.filter(e => e.skipped);
-
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state">
-      <i class="ti ti-inbox-off"></i>
-      <p>Nenhum email nesta categoria.</p>
-    </div>`;
+    list.innerHTML = `<div class="empty-state"><i class="ti ti-inbox-off"></i><p>Nenhum email nesta categoria.</p></div>`;
     return;
   }
-
-  list.innerHTML = filtered.map((e, i) => emailCard(e, i, 'email')).join('');
+  list.innerHTML = filtered.map((e, i) => emailCard(e, i, 'e')).join('');
 }
 
-// ─── EMAILS IMPORTANTES ───────────────────────────────────
+// ─── EMAILS IMPORTANTES ──────────────────────────────────
 function renderImportant() {
   const list = document.getElementById('important-list');
-
   if (!allImportant.length) {
-    list.innerHTML = `<div class="empty-state">
-      <i class="ti ti-star-off"></i>
-      <p>Nenhum email importante encontrado ainda.<br>Execute o agente para classificar seus emails.</p>
-    </div>`;
+    list.innerHTML = `<div class="empty-state"><i class="ti ti-star-off"></i><p>Nenhum email importante encontrado ainda.<br>Execute o agente para classificar seus emails.</p></div>`;
     return;
   }
-
   list.innerHTML = allImportant.map((e, i) => importantCard(e, i)).join('');
 }
 
 function importantCard(e, i) {
-  const initials = (e.from_email || '?').charAt(0).toUpperCase();
+  const initials   = (e.from_email || '?').charAt(0).toUpperCase();
   const statusBadge = e.sent
     ? `<span class="badge badge-sent">✓ enviado</span>`
-    : e.reply
-      ? `<span class="badge badge-dry">dry run</span>`
-      : '';
-
-  const bodyContent = `
+    : e.reply ? `<span class="badge badge-dry">dry run</span>` : '';
+  const body = `
     <div class="email-pane" style="grid-column:span 2">
       ${e.importance_reason ? `<div class="importance-reason-box"><i class="ti ti-star-filled"></i>${esc(e.importance_reason)}</div>` : ''}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:.5rem">
         <div>
           <div class="pane-label"><i class="ti ti-mail-opened"></i> mensagem recebida</div>
-          <div class="pane-text">${esc(e.body || '')}</div>
+          <div class="pane-text">${esc(e.body||'')}</div>
         </div>
         <div style="border-left:1px solid var(--border);padding-left:1rem">
           <div class="pane-label"><i class="ti ti-robot"></i> resposta gerada</div>
-          <div class="pane-reply">${e.reply ? esc(e.reply) : '<em style="color:var(--muted2)">Nenhuma resposta gerada</em>'}</div>
+          <div class="pane-reply">${e.reply ? esc(e.reply) : '<em style="color:var(--muted2)">—</em>'}</div>
         </div>
       </div>
     </div>`;
-
   return `
   <div class="email-card important" id="imp-card-${i}">
-    <div class="email-header" onclick="toggleImp(${i})">
+    <div class="email-header" onclick="toggleCard('imp-body-${i}','imp-chev-${i}')">
       <div class="email-avatar imp">${initials}</div>
       <div class="email-meta">
         <div class="email-from">${esc(e.from_email)}</div>
         <div class="email-subj">${esc(e.subject)}</div>
       </div>
       <div class="email-badges">
-        <span class="badge badge-imp">⭐ importante</span>
-        ${statusBadge}
+        <span class="badge badge-imp">⭐ importante</span>${statusBadge}
         <i class="ti ti-chevron-down chevron" id="imp-chev-${i}"></i>
       </div>
     </div>
-    <div class="email-body hidden" id="imp-body-${i}" style="display:none">
-      ${bodyContent}
-    </div>
+    <div class="email-body" id="imp-body-${i}" style="display:none">${body}</div>
   </div>`;
 }
 
-function toggleImp(i) {
-  const body = document.getElementById('imp-body-' + i);
-  const chev = document.getElementById('imp-chev-' + i);
-  if (!body) return;
-  const open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'grid';
-  chev.classList.toggle('open', !open);
+// ─── HISTÓRICO ───────────────────────────────────────────
+async function loadHistory() {
+  document.getElementById('history-list').innerHTML =
+    `<div class="empty-state"><i class="ti ti-loader"></i><p>Carregando...</p></div>`;
+  try {
+    const res = await fetch('/api/history?limit=200');
+    allHistory = await res.json();
+    renderHistory();
+  } catch(e) {
+    document.getElementById('history-list').innerHTML =
+      `<div class="empty-state"><i class="ti ti-database-off"></i><p>Erro ao carregar histórico.</p></div>`;
+  }
 }
 
-// ─── SHARED EMAIL CARD ────────────────────────────────────
-function emailCard(e, i, prefix) {
-  const initials = (e.from_email || '?').charAt(0).toUpperCase();
-  const cardClass = e.skipped ? 'skipped' : e.sent ? 'sent' : e.reply ? 'dry' : '';
+function setHistFilter(f, btn) {
+  currentHFilter = f;
+  document.querySelectorAll('.h-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
 
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  let filtered = allHistory;
+  if (currentHFilter === 'sent')      filtered = allHistory.filter(e => e.sent);
+  if (currentHFilter === 'important') filtered = allHistory.filter(e => e.important);
+  if (currentHFilter === 'skipped')   filtered = allHistory.filter(e => e.skipped);
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><i class="ti ti-database-off"></i><p>Nenhum registro${currentHFilter !== 'all' ? ' nesta categoria' : ''}.<br>${!allHistory.length ? 'Configure o <strong>DATABASE_URL</strong> e execute o agente.' : ''}</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map((e, i) => emailCard(e, i, 'h')).join('');
+}
+
+// ─── EMAIL CARD (shared) ─────────────────────────────────
+function emailCard(e, i, prefix) {
+  const initials  = (e.from_email || '?').charAt(0).toUpperCase();
+  const cardClass = e.skipped ? 'skipped' : e.sent ? 'sent' : e.reply ? 'dry' : '';
   const badge = e.skipped
     ? `<span class="badge badge-skip">ignorado</span>`
-    : e.sent
-      ? `<span class="badge badge-sent">✓ enviado</span>`
-      : e.reply
-        ? `<span class="badge badge-dry">dry run</span>`
-        : `<span class="badge badge-ai">gerado</span>`;
-
+    : e.sent ? `<span class="badge badge-sent">✓ enviado</span>`
+    : e.reply ? `<span class="badge badge-dry">dry run</span>`
+    : `<span class="badge badge-ai">gerado</span>`;
   const impBadge = e.important ? `<span class="badge badge-imp">⭐</span>` : '';
-
+  const ts = e.timestamp ? `<div class="email-ts">${e.timestamp.replace('T',' ').slice(0,16)}</div>` : '';
   const bodyContent = e.skipped
     ? `<div class="email-pane" style="grid-column:span 2">
          <div class="pane-label"><i class="ti ti-ban"></i> motivo</div>
@@ -674,47 +742,42 @@ function emailCard(e, i, prefix) {
        </div>`
     : `<div class="email-pane">
          <div class="pane-label"><i class="ti ti-mail-opened"></i> mensagem recebida</div>
-         <div class="pane-text">${esc(e.body || '')}</div>
+         <div class="pane-text">${esc(e.body||'')}</div>
        </div>
        <div class="email-pane">
          <div class="pane-label"><i class="ti ti-robot"></i> resposta gerada</div>
-         <div class="pane-reply">${e.reply ? esc(e.reply) : '<em style="color:var(--muted2)">Nenhuma resposta gerada</em>'}</div>
+         <div class="pane-reply">${e.reply ? esc(e.reply) : '<em style="color:var(--muted2)">—</em>'}</div>
        </div>`;
-
+  const bid = `${prefix}-body-${i}`, cid = `${prefix}-chev-${i}`;
   return `
-  <div class="email-card ${cardClass}" id="card-${i}">
-    <div class="email-header" onclick="toggle(${i})">
+  <div class="email-card ${cardClass}" id="${prefix}-card-${i}">
+    <div class="email-header" onclick="toggleCard('${bid}','${cid}')">
       <div class="email-avatar">${initials}</div>
       <div class="email-meta">
         <div class="email-from">${esc(e.from_email)}</div>
         <div class="email-subj">${esc(e.subject)}</div>
+        ${ts}
       </div>
-      <div class="email-badges">
-        ${impBadge}
-        ${badge}
-        <i class="ti ti-chevron-down chevron" id="chev-${i}"></i>
-      </div>
+      <div class="email-badges">${impBadge}${badge}<i class="ti ti-chevron-down chevron" id="${cid}"></i></div>
     </div>
-    <div class="email-body hidden" id="body-${i}" style="display:none">
-      ${bodyContent}
-    </div>
+    <div class="email-body" id="${bid}" style="display:none">${bodyContent}</div>
   </div>`;
 }
 
-function toggle(i) {
-  const body = document.getElementById('body-' + i);
-  const chev = document.getElementById('chev-' + i);
+function toggleCard(bodyId, chevId) {
+  const body = document.getElementById(bodyId);
+  const chev = document.getElementById(chevId);
   if (!body) return;
   const open = body.style.display !== 'none';
   body.style.display = open ? 'none' : 'grid';
-  chev.classList.toggle('open', !open);
+  if (chev) chev.classList.toggle('open', !open);
 }
 
 function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ─── STATUS PILL ─────────────────────────────────────────
+// ─── STATUS ──────────────────────────────────────────────
 function setStatus(running) {
   const pill = document.getElementById('status-pill');
   if (running) {
@@ -742,9 +805,12 @@ syncState();
 setInterval(async () => {
   if (!pollTimer) {
     try {
-      const [impRes] = await Promise.all([fetch('/api/important-emails')]);
-      allImportant = await impRes.json();
+      const [iR, sR] = await Promise.all([fetch('/api/important-emails'), fetch('/api/status')]);
+      allImportant = await iR.json();
+      const s = await sR.json();
       updateImportantCount(allImportant.length);
+      updateHistCount(s.db_total || 0);
+      updateDbChip(s.db_connected);
       if (currentView === 'important') renderImportant();
     } catch(e) {}
   }
