@@ -5,6 +5,8 @@ import email
 import os
 import json
 import re
+import uuid
+import urllib.parse
 from pathlib import Path
 from datetime import datetime
 from typing import List, Optional
@@ -12,25 +14,139 @@ from typing import List, Optional
 from email.mime.text import MIMEText
 from email.header import decode_header
 
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Query
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from dotenv import load_dotenv
 
+from sqlalchemy import create_engine, Column, String, Boolean, Text, Integer
+from sqlalchemy.orm import declarative_base, Session as DBSession
+
 from agno.agent import Agent
 from agno.models.groq import Groq
 
-load_dotenv()
+# latin-1 aceita qualquer byte — evita crash em .env salvo como Windows-1252
+load_dotenv(encoding='latin-1')
 
 app = FastAPI(title="Auto Reply Dashboard")
+
+# ─── BANCO DE DADOS ───────────────────────────────────────
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+Base = declarative_base()
+db_engine = None
+
+class EmailModel(Base):
+    __tablename__ = "emails"
+    uid          = Column(String, primary_key=True)
+    email_id     = Column(String)
+    from_email   = Column(Text)
+    subject      = Column(Text)
+    body         = Column(Text)
+    reply        = Column(Text, nullable=True)
+    sent         = Column(Boolean, default=False)
+    skipped      = Column(Boolean, default=False)
+    skip_reason  = Column(Text, nullable=True)
+    important    = Column(Boolean, default=False)
+    importance_reason = Column(Text, nullable=True)
+    timestamp    = Column(String)
+
+def _sanitize_db_url(url: str) -> str:
+    """Corrige prefixo e URL-encoda a senha caso tenha caracteres especiais."""
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    try:
+        p = urllib.parse.urlparse(url)
+        if p.password:
+            safe_pass = urllib.parse.quote(p.password, safe="")
+            safe_user = urllib.parse.quote(p.username or "", safe="")
+            host_port = p.hostname + (f":{p.port}" if p.port else "")
+            netloc = f"{safe_user}:{safe_pass}@{host_port}"
+            url = urllib.parse.urlunparse(p._replace(netloc=netloc))
+    except Exception:
+        pass
+    return url
+
+
+def init_db():
+    global db_engine
+    if not DATABASE_URL:
+        return
+    try:
+        url = _sanitize_db_url(DATABASE_URL)
+        db_engine = create_engine(url, pool_pre_ping=True)
+        Base.metadata.create_all(db_engine)
+        print("✅ Banco de dados conectado!")
+    except Exception as e:
+        print(f"⚠️ Banco de dados indisponível: {e}")
+
+def save_to_db(record_dict: dict):
+    if not db_engine:
+        return
+    try:
+        with DBSession(db_engine) as session:
+            obj = EmailModel(
+                uid=str(uuid.uuid4()),
+                email_id=record_dict["id"],
+                from_email=record_dict["from_email"],
+                subject=record_dict["subject"],
+                body=record_dict["body"],
+                reply=record_dict.get("reply"),
+                sent=record_dict.get("sent", False),
+                skipped=record_dict.get("skipped", False),
+                skip_reason=record_dict.get("skip_reason"),
+                important=record_dict.get("important", False),
+                importance_reason=record_dict.get("importance_reason"),
+                timestamp=record_dict["timestamp"],
+            )
+            session.add(obj)
+            session.commit()
+    except Exception as e:
+        print(f"⚠️ Erro ao salvar no banco: {e}")
+
+def db_total_count() -> int:
+    if not db_engine:
+        return 0
+    try:
+        with DBSession(db_engine) as session:
+            return session.query(EmailModel).count()
+    except Exception:
+        return 0
+
+def db_fetch_history(limit: int = 200, offset: int = 0) -> list:
+    if not db_engine:
+        return []
+    try:
+        with DBSession(db_engine) as session:
+            rows = (
+                session.query(EmailModel)
+                .order_by(EmailModel.timestamp.desc())
+                .offset(offset)
+                .limit(limit)
+                .all()
+            )
+            return [
+                {
+                    "id": r.email_id, "from_email": r.from_email,
+                    "subject": r.subject, "body": r.body, "reply": r.reply,
+                    "sent": r.sent, "skipped": r.skipped, "skip_reason": r.skip_reason,
+                    "important": r.important, "importance_reason": r.importance_reason,
+                    "timestamp": r.timestamp,
+                }
+                for r in rows
+            ]
+    except Exception:
+        return []
+
 
 @app.on_event("startup")
 async def startup_event():
     global is_running
     is_running = False
     _pause_event.clear()
+    init_db()
+
 
 # ─── ESTADO GLOBAL (em memória) ───────────────────────────
 processed_emails: List[dict] = []
@@ -38,6 +154,7 @@ important_emails: List[dict] = []
 run_log: List[str] = []
 is_running: bool = False
 _pause_event = threading.Event()  # set() = pausado, clear() = rodando
+
 
 # ─── AGENTE IA ────────────────────────────────────────────
 def build_agent(signature: str = "Felipe Nascimento") -> Agent:
@@ -69,7 +186,7 @@ Assine sempre:
 # ─── SCHEMAS ──────────────────────────────────────────────
 class RunConfig(BaseModel):
     signature: str = "Felipe Nascimento"
-    dry_run: bool = False   # True = gera resposta mas NÃO envia
+    dry_run: bool = False
 
 
 class EmailRecord(BaseModel):
@@ -94,20 +211,70 @@ def log(msg: str):
     print(entry)
 
 
-def should_skip(from_email: str, body: str) -> Optional[str]:
-    checks = [
-        ("no-reply" in from_email.lower(), "Remetente no-reply"),
-        ("noreply" in from_email.lower(),  "Remetente noreply"),
-        ("google" in from_email.lower(),   "Email do Google"),
-        ("unsubscribe" in body.lower(),    "Conteúdo de unsubscribe"),
+def should_skip(from_email: str, subject: str, body: str) -> Optional[str]:
+    f = from_email.lower()
+    s = subject.lower()
+    b = body.lower()
+
+    # ── No-reply / automatizados
+    if any(x in f for x in ("no-reply", "noreply", "do-not-reply", "donotreply")):
+        return "Remetente no-reply/automatizado"
+
+    # ── Google
+    if "google" in f:
+        return "Email do Google"
+
+    # ── Facebook
+    if "facebookmail.com" in f or "facebook.com" in f:
+        return "Notificação do Facebook"
+    if any(x in s or x in b for x in (
+        "pedido de amizade", "quer ser seu amigo", "adicionou você",
+        "friend request", "wants to be your friend", "added you as a friend",
+    )):
+        return "Pedido de amizade (Facebook)"
+
+    # ── Spam
+    spam_kw = [
+        "você ganhou", "parabéns, você", "você foi selecionado", "você foi escolhido",
+        "resgate seu prêmio", "clique aqui para resgatar", "resgate agora",
+        "ganhou um prêmio", "ganhou um iphone", "ganhou um brinde",
+        "lottery winner", "you have won", "congratulations you", "claim your prize",
+        "free gift", "free money", "make money fast", "work from home",
     ]
-    for condition, reason in checks:
-        if condition:
-            return reason
+    if any(x in s or x in b for x in spam_kw):
+        return "Spam detectado"
+
+    # ── Marketing / Promoções
+    promo_from = [
+        "newsletter", "marketing@", "promo@", "offers@", "deals@",
+        "promotions@", "campaign@", "news@", "mailchimp", "sendgrid",
+        "klaviyo", "brevo", "constantcontact", "hubspot",
+    ]
+    if any(x in f for x in promo_from):
+        return "Email de marketing/newsletter"
+
+    promo_subject = [
+        "% off", "% de desconto", "desconto exclusivo", "desconto especial",
+        "oferta especial", "oferta imperdível", "oferta por tempo limitado",
+        "black friday", "cyber monday", "liquidação", "frete grátis", "frete gratis",
+        "compre agora", "últimas unidades", "últimas horas", "só hoje",
+        "promoção", "promoção relâmpago", "super oferta", "super desconto",
+        "sale", "big sale", "flash sale", "deal of the day", "limited offer",
+        "buy now", "shop now", "order now", "act now",
+        "ganhe", "aproveite", "não perca", "não perca essa oferta",
+        "cupom", "coupon", "voucher", "cashback",
+    ]
+    if any(x in s for x in promo_subject):
+        return "Promoção/Anúncio"
+
+    # ── Unsubscribe no corpo (indicador de marketing)
+    if any(x in b for x in ("unsubscribe", "cancelar inscrição", "opt-out", "opt out", "descadastrar")):
+        return "Email de marketing (opt-out)"
+
     return None
 
 
-# ─── TAREFA EM BACKGROUND ─────────────────────────────────
+# ─── IA: CLASSIFICAÇÃO DE IMPORTÂNCIA ─────────────────────
 def classify_importance(agent: Agent, body: str, subject: str) -> tuple[bool, Optional[str]]:
     prompt = f"""Analise o email abaixo e responda APENAS em JSON válido, sem texto extra.
 
@@ -140,6 +307,7 @@ EMAIL:
     return False, None
 
 
+# ─── TAREFA EM BACKGROUND ─────────────────────────────────
 def process_emails_task(signature: str, dry_run: bool):
     global is_running, processed_emails, important_emails, run_log
 
@@ -190,7 +358,6 @@ def process_emails_task(signature: str, dry_run: bool):
                 from_email = msg.get("From", "")
                 log(f"📧 [{idx+1}/{len(email_ids)}] De: {from_email} | Assunto: {subject}")
 
-                # corpo
                 body = ""
                 if msg.is_multipart():
                     for part in msg.walk():
@@ -208,13 +375,15 @@ def process_emails_task(signature: str, dry_run: bool):
                     timestamp=datetime.now().isoformat(),
                 )
 
-                # filtros
-                skip_reason = should_skip(from_email, body)
+                # filtros expandidos
+                skip_reason = should_skip(from_email, subject, body)
                 if skip_reason:
                     record.skipped = True
                     record.skip_reason = skip_reason
                     log(f"⏭️  Ignorado: {skip_reason}")
-                    processed_emails.append(record.model_dump())
+                    record_dict = record.model_dump()
+                    processed_emails.append(record_dict)
+                    save_to_db(record_dict)
                     continue
 
                 # gerar resposta
@@ -233,8 +402,7 @@ EMAIL RECEBIDO:
 """
                 log("🤖 Gerando resposta com IA...")
                 resposta = agent.run(prompt)
-                resposta_texto = resposta.content
-                record.reply = resposta_texto
+                record.reply = resposta.content
 
                 log("🔍 Classificando importância...")
                 is_important, importance_reason = classify_importance(agent, body, subject)
@@ -245,15 +413,13 @@ EMAIL RECEBIDO:
 
                 if dry_run:
                     log("📝 [DRY RUN] Resposta gerada, envio pulado.")
-                    record.sent = False
                 else:
-                    # enviar
                     try:
                         smtp = smtplib.SMTP("smtp.gmail.com", 587)
                         smtp.starttls()
                         smtp.login(EMAIL_USER, EMAIL_PASS)
 
-                        reply_msg = MIMEText(resposta_texto)
+                        reply_msg = MIMEText(record.reply)
                         reply_msg["Subject"] = f"Re: {subject}"
                         reply_msg["From"] = EMAIL_USER
                         reply_msg["To"] = from_email
@@ -268,6 +434,7 @@ EMAIL RECEBIDO:
 
                 record_dict = record.model_dump()
                 processed_emails.append(record_dict)
+                save_to_db(record_dict)
                 if record.important:
                     important_emails.append(record_dict)
 
@@ -298,7 +465,14 @@ def status():
         "sent": sum(1 for e in processed_emails if e.get("sent")),
         "skipped": sum(1 for e in processed_emails if e.get("skipped")),
         "important": len(important_emails),
+        "db_total": db_total_count(),
+        "db_connected": db_engine is not None,
     }
+
+
+@app.get("/api/emails")
+def get_emails():
+    return processed_emails
 
 
 @app.get("/api/important-emails")
@@ -306,9 +480,9 @@ def get_important_emails():
     return important_emails
 
 
-@app.get("/api/emails")
-def get_emails():
-    return processed_emails
+@app.get("/api/history")
+def get_history(limit: int = Query(default=200, le=500), offset: int = Query(default=0)):
+    return db_fetch_history(limit=limit, offset=offset)
 
 
 @app.get("/api/log")
