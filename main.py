@@ -6,7 +6,6 @@ import os
 import json
 import re
 import uuid
-import urllib.parse
 from pathlib import Path
 from datetime import datetime
 from typing import List, Optional
@@ -33,7 +32,7 @@ load_dotenv(encoding='latin-1')
 app = FastAPI(title="Auto Reply Dashboard")
 
 # ─── BANCO DE DADOS ───────────────────────────────────────
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///emails.db")
 Base = declarative_base()
 db_engine = None
 
@@ -52,30 +51,10 @@ class EmailModel(Base):
     importance_reason = Column(Text, nullable=True)
     timestamp    = Column(String)
 
-def _sanitize_db_url(url: str) -> str:
-    """Corrige prefixo e URL-encoda a senha caso tenha caracteres especiais."""
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
-    try:
-        p = urllib.parse.urlparse(url)
-        if p.password:
-            safe_pass = urllib.parse.quote(p.password, safe="")
-            safe_user = urllib.parse.quote(p.username or "", safe="")
-            host_port = p.hostname + (f":{p.port}" if p.port else "")
-            netloc = f"{safe_user}:{safe_pass}@{host_port}"
-            url = urllib.parse.urlunparse(p._replace(netloc=netloc))
-    except Exception:
-        pass
-    return url
-
-
 def init_db():
     global db_engine
-    if not DATABASE_URL:
-        return
     try:
-        url = _sanitize_db_url(DATABASE_URL)
-        db_engine = create_engine(url, pool_pre_ping=True)
+        db_engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
         Base.metadata.create_all(db_engine)
         print("✅ Banco de dados conectado!")
     except Exception as e:
