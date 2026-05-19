@@ -50,13 +50,15 @@ for email_id in email_ids:
                     content_type = part.get_content_type()
 
                     if content_type == "text/plain":
-                        body = part.get_payload(decode=True).decode()
+                        charset = part.get_content_charset() or "utf-8"
+                        body = part.get_payload(decode=True).decode(charset, errors="replace")
 
                         print("Mensagem:")
                         print(body)
 
             else:
-                body = msg.get_payload(decode=True).decode()
+                charset = msg.get_content_charset() or "utf-8"
+                body = msg.get_payload(decode=True).decode(charset, errors="replace")
 
                 print(body)
 
